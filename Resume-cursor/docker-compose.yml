@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: resume
+      POSTGRES_PASSWORD: resume
+      POSTGRES_DB: resume
+    ports:
+      - "5432:5432"
+    volumes:
+      - resume_pgdata:/var/lib/postgresql/data
+
+volumes:
+  resume_pgdata:

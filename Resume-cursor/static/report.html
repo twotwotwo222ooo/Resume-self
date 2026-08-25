@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审查报告</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="report-body">
+  <div class="report-shell">
+    <header class="topbar">
+      <strong>审查报告</strong>
+      <span id="report-title" class="muted"></span>
+      <a class="nav-btn" href="/">返回审查</a>
+    </header>
+    <p id="report-waiting" class="report-waiting">正在等待审查结果…</p>
+    <div id="report-board" class="report-board hidden">
+      <section class="report-col">
+        <h2>综合评分</h2>
+        <div id="col-scores" class="report-col-body"></div>
+      </section>
+      <section class="report-col">
+        <h2>整体评价</h2>
+        <div id="col-summary" class="report-col-body"></div>
+      </section>
+    </div>
+  </div>
+  <script src="/static/report.js"></script>
+  <script>
+    bootReportPage();
+  </script>
+</body>
+</html>

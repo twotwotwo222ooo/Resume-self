@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>简历审查 Agent</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="auth-view" class="page">
+    <div class="auth-card">
+      <h1>简历审查</h1>
+      <p class="muted">上传 PDF，生成六维评分与整体评价</p>
+      <div class="tabs">
+        <button type="button" id="tab-login" class="tab active">登录</button>
+        <button type="button" id="tab-register" class="tab">邀请注册</button>
+      </div>
+      <form id="form-login">
+        <label>邮箱<input type="email" name="email" required></label>
+        <label>密码<input type="password" name="password" required minlength="6"></label>
+        <button type="submit">登录</button>
+      </form>
+      <form id="form-register" class="hidden">
+        <label>邀请码<input type="text" name="token" required></label>
+        <label>邮箱<input type="email" name="email" required></label>
+        <label>密码<input type="password" name="password" required minlength="6"></label>
+        <button type="submit">注册并登录</button>
+      </form>
+      <p id="auth-error" class="error"></p>
+    </div>
+  </div>
+
+  <div id="app-view" class="page hidden">
+    <header class="topbar">
+      <strong>简历审查 Agent</strong>
+      <nav id="nav">
+        <button type="button" data-panel="review" class="nav-btn active">审查</button>
+        <button type="button" data-panel="history" class="nav-btn">历史</button>
+        <button type="button" data-panel="invites" class="nav-btn hidden" id="nav-invites">邀请</button>
+        <button type="button" data-panel="admin" class="nav-btn hidden" id="nav-admin">企业</button>
+      </nav>
+      <div class="who">
+        <span id="who"></span>
+        <button type="button" id="btn-logout">退出</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="panel-review" class="panel">
+        <form id="form-review" class="card">
+          <h2>上传简历</h2>
+          <label>PDF 文件（文本型，最大 8MB）
+            <input type="file" name="file" id="review-file" accept="application/pdf" required>
+          </label>
+          <div id="extract-preview" class="extract-box hidden">
+            <h3>提取文本预览</h3>
+            <p id="extract-meta" class="muted"></p>
+            <p id="extract-warn" class="extract-warn hidden"></p>
+            <pre id="extract-text" class="extract-preview"></pre>
+            <p class="muted">请核对父块标题（工作经历 / 项目经历 / 专业技能等）以及子块是否按标点或空格切开。确认无误后再开始审查。</p>
+          </div>
+          <label>目标岗位名称（可选）
+            <input type="text" name="job_title" placeholder="例如：后端开发工程师">
+          </label>
+          <label>岗位说明 / JD（可选）
+            <textarea name="job_description" rows="5" placeholder="粘贴职位描述，不填则按通用研发岗评估"></textarea>
+          </label>
+          <button type="submit" id="btn-review" disabled>开始审查</button>
+          <button type="button" id="btn-open-report" class="secondary hidden">打开报告页</button>
+          <p id="review-status" class="muted"></p>
+        </form>
+        <div id="report" class="hidden"></div>
+      </section>
+
+      <section id="panel-history" class="panel hidden">
+        <div class="card history-card">
+          <div class="history-head">
+            <h2>审查历史</h2>
+            <p class="muted">勾选左侧多选框后可批量删除；单条删除请用该行右侧「删除」。</p>
+          </div>
+          <div class="history-toolbar">
+            <span id="history-status" class="muted">未选择记录</span>
+            <button type="button" id="btn-history-delete" class="danger" disabled>批量删除</button>
+          </div>
+          <div class="history-table">
+            <div class="history-thead">
+              <label class="history-check-wrap" title="全选">
+                <input type="checkbox" id="history-select-all" aria-label="全选">
+              </label>
+              <span>简历</span>
+              <span>岗位</span>
+              <span>评分</span>
+              <span>状态</span>
+              <span class="history-actions-head">操作</span>
+            </div>
+            <div id="history-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel-invites" class="panel hidden">
+        <form id="form-invite" class="card">
+          <h2>邀请成员</h2>
+          <label>邮箱<input type="email" name="email" required></label>
+          <label>角色
+            <select name="role">
+              <option value="member">成员</option>
+              <option value="tenant_admin">企业管理员</option>
+            </select>
+          </label>
+          <button type="submit">生成邀请码</button>
+          <p id="invite-result" class="muted"></p>
+        </form>
+        <div class="card">
+          <h2>本企业邀请</h2>
+          <div id="invite-list"></div>
+        </div>
+      </section>
+
+      <section id="panel-admin" class="panel hidden">
+        <form id="form-tenant" class="card">
+          <h2>预置企业</h2>
+          <label>企业名称<input type="text" name="name" required></label>
+          <label>标识 slug（小写字母、数字、短横线或下划线）<input type="text" name="slug" required minlength="2" maxlength="80" pattern="[a-z0-9_-]+" title="只能使用小写字母、数字、短横线或下划线，例如 itheima-123"></label>
+          <label>首位企业管理员邮箱<input type="email" name="admin_email" required></label>
+          <button type="submit">创建企业并发邀请</button>
+          <p id="tenant-result" class="muted"></p>
+        </form>
+        <div class="card">
+          <h2>全部企业</h2>
+          <div id="tenant-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="confirm-dialog" class="confirm-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-backdrop"></div>
+    <div class="confirm-panel">
+      <h3 id="confirm-title">确认删除</h3>
+      <p id="confirm-message" class="muted"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirm-cancel" class="secondary">取消</button>
+        <button type="button" id="confirm-ok" class="danger">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/report.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

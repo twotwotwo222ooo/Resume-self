@@ -1,0 +1,1 @@
+from app.agents import registry  # noqa: F401
